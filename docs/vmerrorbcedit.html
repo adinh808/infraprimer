@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Blog on Infra, Middleware Topics</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+			<div id="wrapper">
+					<div id="main">
+						<div class="inner">
+								<header id="header">
+									<a href="index.html" class="logo"><strong>Infra Primer</strong> Blog !!!</a>
+								</header>
+								<section>
+									<header class="main">
+										<h2>VM Virtual box manager error</h2>
+									</header>
+									<h3><u>Issue:</u></h3> Upon setting and starting up a Ubuntu OS on Oracle VM Virtual Box, a error message pops up on Windows 10 Operating System. Hyper-V is enabled on Windows 10 but still Ubuntu OS will not get started. 
+									<br><br>
+									Error message from the pop up is displayed as, <b>VT-x is not available (VERR_VMX_NO_VMX) </b>. Below screenshot shows the message. <br>
+									<img src="images/bcedit2.png"/><br><br>
+									Check Windows Hyper-V feature is enabled and in which mode as shown in below screenshot, 
+									<img src="images/bcedit1.png"/><br>
+									<br>
+									<h3><u>Resolution:</u></h3>
+									Commands mentioned in below link worked for me and I have executed <b><u>bcdedit</u></b> related command to make the Ubuntu OS up and running. 
+									Link for reference: <a href="https://stackoverflow.com/questions/30496116/how-to-disable-hyper-v-in-command-line" target="_blank">https://stackoverflow.com/questions/30496116/how-to-disable-hyper-v-in-command-line </a>
+									<br><br>
+									<u><i>Command executed:</i></u> <b>bcdedit /set hypervisorlaunchtype off</b>
+									<br><br>
+									<img src="images/bcedit3.png"/><br><br>
+									Run bcdedit from command prompt and check the output, hypervisorlaunchtype paramter should show as Off<br> 
+									<img src="images/bcedit4.png"/><br><br>
+									Upon restarting Windows OS, I could see the Ubuntu VM up and running successfully. 
+									<br><br>
+									To make the command active, run below command, <br>
+									<b>bcdedit /set hypervisorlaunchtype auto </b><br><br>
+									<img src="images/bcedit5.png"/><br><br>
+									Following a Microsoft link as given below, we could see that we have to disable the Hyper-V feature so that the VM can be started.
+									<a href="https://support.microsoft.com/en-ca/help/3204980/virtualization-applications-do-not-work-together-with-hyper-v-device-g" target="_blank">
+									https://support.microsoft.com/en-ca/help/3204980/virtualization-applications-do-not-work-together-with-hyper-v-device-g
+									</a><br><br>
+									Going through few other comments in internet, I could see that, there may be a case of error like, <b><u>Raw-mode is unavailable courtesy of Hyper-V. (VERR_SUPDRV_NO_RAW_MODE_HYPER_V_ROOT).</u></b> and above command should fix the error or disable Hyper-V feature.  
+									<hr class="major"/>
+									Back to <a href="index.html">Home</a>
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+								<nav id="menu">
+									<header class="major">
+										<h2>Infra Primer blog !!!</h2>
+									</header>
+									<ul>
+										<li><a href="index.html">Home</a></li>
+										<li><a href="issuelog.html">Issues Log</a></li>
+										<li>
+											<span class="opener">Containers/Devops</span>
+											<ul>
+												<li><a href="kubernetes.html">Kubernetes</a></li>
+												<li><a href="#">Openshift</a></li>
+												<li><a href="#">CI/CD</a></li>
+												<li><a href="helminstall.html">Helm</a></li>
+											</ul>
+										</li>
+									</ul>
+								</nav>
+								<section>
+									<header class="major">
+										<h2>Get in touch</h2>
+									</header>
+									<p>Available over email always !!!</p>
+									<ul class="contact">
+										<li class="icon solid fa-envelope"><a href="#">adinh808@yahoo.com</a></li>
+										<li class="icon solid fa-home">Hyderabad, India.</li>
+									</ul>
+								</section>
+								<footer id="footer">
+									<p class="copyright">&copy; H Adinarayana. All rights reserved.</p>
+								</footer>
+						</div>
+					</div>
+
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
