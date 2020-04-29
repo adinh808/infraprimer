@@ -1,0 +1,285 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Blog on Infra, Middleware Topics</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+			<div id="wrapper">
+					<div id="main">
+						<div class="inner">
+								<header id="header">
+									<a href="index.html" class="logo"><strong>Infra Primer</strong> Blog !!!</a>
+								</header>
+								<section>
+									<header class="main">
+										<h2>Persistent Volumes Example using Wordpress</h2>
+									</header>
+									Deploying WordPress and MySQL with Persistent Volumes as mentioned in this <a href="https://kubernetes.io/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume" target="_blank"><u><b>link</b></u></a> will give details about how to deploy a WordPress site and a MySQL database using Minikube. Both mysql and wordpress applications use PersistentVolumes and PersistentVolumeClaims to store data.
+									<br></br>	
+									A PersistentVolume (PV) is a piece of storage in the cluster that has been manually provisioned by an administrator, or dynamically provisioned by Kubernetes using a StorageClass. A PersistentVolumeClaim (PVC) is a request for storage by a user that can be fulfilled by a PV. PersistentVolumes and PersistentVolumeClaims are independent from Pod lifecycles and preserve data through restarting, rescheduling, and even deleting Pods.
+									<br><br>
+									MySQL and Wordpress each require a PersistentVolume to store data. Their PersistentVolumeClaims will be created at the deployment step. Many cluster environments have a default StorageClass installed. When a StorageClass is not specified in the PersistentVolumeClaim, the cluster’s default StorageClass is used instead. When a PersistentVolumeClaim is created, a PersistentVolume is dynamically provisioned based on the StorageClass configuration.
+									<br><br>
+									A Secret is an object that stores a piece of sensitive data like a password or key. Since 1.14, kubectl supports the management of Kubernetes objects using a kustomization file. You can create a Secret by generators in kustomization.yaml. Add a Secret generator in kustomization.yaml from the following command. You will need to replace YOUR_PASSWORD with the password you want to use.
+									<br><br>
+									<b>kustomization.yaml</b>
+<pre>
+<code>									
+cat <<EOF >./kustomization.yaml
+secretGenerator:
+- name: mysql-pass
+  literals:
+  - password=YOUR_PASSWORD
+EOF
+</code>
+</pre>
+									<img src="images/wp1.png"/><br><br>
+									Add resource configs for MySQL and WordPress. The following yaml manifest describes a single-instance MySQL Deployment. The MySQL container mounts the PersistentVolume at /var/lib/mysql. The MYSQL_ROOT_PASSWORD environment variable sets the database password from the Secret.
+									<br><br>
+									<b>mysql-deployment.yaml</b>
+									<br>
+<pre>
+<code>									
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: wordpress
+    tier: mysql
+  clusterIP: None
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  labels:
+    app: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: mysql
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
+</code>
+</pre>
+									The following manifest describes a single-instance WordPress Deployment. The WordPress container mounts the PersistentVolume at /var/www/html for website data files. The WORDPRESS_DB_HOST environment variable sets the name of the MySQL Service defined above, and WordPress will access the database by Service. The WORDPRESS_DB_PASSWORD environment variable sets the database password from the Secret kustomize generated.
+									<br><br>
+									<b>wordpress-deployment.yaml</b>
+<pre>
+<code>																	
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: wordpress
+    tier: frontend
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wp-pv-claim
+  labels:
+    app: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend
+    spec:
+      containers:
+      - image: wordpress:4.8-apache
+        name: wordpress
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: wordpress-mysql
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        ports:
+        - containerPort: 80
+          name: wordpress
+        volumeMounts:
+        - name: wordpress-persistent-storage
+          mountPath: /var/www/html
+      volumes:
+      - name: wordpress-persistent-storage
+        persistentVolumeClaim:
+          claimName: wp-pv-claim
+</code>
+</pre>
+									<img src="images/wp2.png"/><br><br>
+									<img src="images/wp3.png"/><br><br>
+									Add them to kustomization.yaml file.
+									<br>
+<pre>
+<code>									
+cat <<EOF >>./kustomization.yaml
+resources:
+- mysql-deployment.yaml
+- wordpress-deployment.yaml
+EOF
+</code>
+</pre>
+									Run below commands to proceed further on Wordpress setup. 
+									<br>
+									kubectl apply -k ./
+									<br>
+									<img src="images/wp4.png"/><br><br>
+									<br>
+									Verify that the Secret exists by running the following command:
+									<br>
+									kubectl get secrets
+									<br><br>
+									Verify that a PersistentVolume got dynamically provisioned.
+									<br>
+									kubectl get pvc
+									<br><br>
+									<img src="images/wp5.png"/><br><br>
+									kubectl get services wordpress
+									<br><br>
+									minikube service wordpress --url
+									<br><br>
+									WordPress set up page<br> 
+									<img src="images/wp6.png"/><br><br>
+									<br><br>
+									<hr class="major"/>
+									Reference links for going through Kubernetes site, 
+									<br><br>
+									Persistent Volumes: <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/" target="_blank">https://kubernetes.io/docs/concepts/storage/persistent-volumes/ </a>
+									<br>
+									Storage Classes: <a href="https://kubernetes.io/docs/concepts/storage/storage-classes/" target="_blank">https://kubernetes.io/docs/concepts/storage/storage-classes/ </a>
+									<br>
+									Persistent Volume Claims: <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims" target="_blank">https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims </a>
+									<br><br>
+									Back to <a href="index.html">Home</a>
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+								<nav id="menu">
+									<header class="major">
+										<h2>Infra Primer blog !!!</h2>
+									</header>
+									<ul>
+										<li><a href="index.html">Home</a></li>
+										<li><a href="issuelog.html">Issues Log</a></li>
+										<li>
+											<span class="opener">Containers/Devops</span>
+											<ul>
+												<li><a href="kubernetes.html">Kubernetes</a></li>
+												<li><a href="#">Openshift</a></li>
+												<li><a href="#">CI/CD</a></li>
+												<li><a href="helminstall.html">Helm</a></li>
+											</ul>
+										</li>
+									</ul>
+								</nav>
+								<section>
+									<header class="major">
+										<h2>Get in touch</h2>
+									</header>
+									<p>Available over email always !!!</p>
+									<ul class="contact">
+										<li class="icon solid fa-envelope"><a href="#">adinh808@yahoo.com</a></li>
+										<li class="icon solid fa-home">Hyderabad, India.</li>
+									</ul>
+								</section>
+								<footer id="footer">
+									<p class="copyright">&copy; H Adinarayana. All rights reserved.</p>
+								</footer>
+						</div>
+					</div>
+
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
