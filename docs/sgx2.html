@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Blog on Infra, Middleware Topics</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+			<div id="wrapper">
+					<div id="main">
+						<div class="inner">
+								<header id="header">
+									<a href="index.html" class="logo"><strong>Infra Primer</strong> Blog !!!</a>
+								</header>
+								<section>
+									<header class="main">
+										<h2>Software Guard Extension (SGX) enabled Kubernetes and OpenShift cluster</h2>
+									</header>
+									<h3><u>Details:</u></h3> 
+									Follow these steps to provision a Kubernetes and OpenShift cluster with SGX option enabled. 
+									<br><br>
+									1. Login to IBM Cloud account<br><br>
+									2. Click on the Classic Infrastructure <br><br>
+									<img src="images/sgx9.png"/><br><br>
+									Click on Devices<br>
+									<img src="images/sgx10.png"/><br><br>
+									Select Services and then click on Containers. Click on Kubernetes Service (Process below applies to OpenShift as well with different machine type selection)
+									<img src="images/sgx12.png"/><br><br>
+									3. Select Kubernetes Stable version<br> 
+									<img src="images/sgx4.png"/><br><br>
+									4. Click on Change Flavor.<br><br>
+									<img src="images/sgx5.png"/>
+									<br><br>
+									5. Filter options as given below. Select Metal as "Bare Metal" and Operating System as "Ubuntu 16". <br><br>
+									<img src="images/sgx6.png"/><br><br>
+									6. Here we see two Machine type with SGX enabled. As per IBM Cloud Data Shield documentation, below are the machine types where SGX is enabled for kubernetes and openshift cluster.<br><br> 
+									<img src="images/sgx7.png"/><br>
+									<br><br>
+									Same case applies to <b>OpenShift Cluster</b> as well. Rather Kubernetes select RedHat OpenShift Cloud option. Below image for reference.<br><br>
+									<img src="images/sgx8.png"/><br><br>
+									Note the difference between images that are available for Kubernetes and OpenShift cluster, <br>
+									Kubernetes Service --> <b>mb2c.4x32</b> and <b>ms2c.4x32.1.9tb.ssd</b><br>
+									OpenShift --> <b>mb3c.4x32</b> and <b>ms3c.4x32.1.9tb.ssd</b><br>
+									<br>
+									<img src="images/sgx13.png"/><br><br>
+									Once the cluster is ready, please use this link to get started on using IBM Cloud Data Shield, <a href="https://cloud.ibm.com/docs/data-shield?topic=data-shield-getting-started" target="_blank">https://cloud.ibm.com/docs/data-shield?topic=data-shield-getting-started</a>
+									<br><br>
+									<b>References: </b>
+									<br>	
+									About SGX: <a href="https://software.intel.com/content/www/us/en/develop/topics/software-guard-extensions.html" target="_blank">https://software.intel.com/content/www/us/en/develop/topics/software-guard-extensions.html</a>
+									<br>
+									About IBM Cloud Data Shield: <a href="https://cloud.ibm.com/docs/data-shield?topic=data-shield-getting-started" target="_blank">https://cloud.ibm.com/docs/data-shield?topic=data-shield-getting-started</a>
+									<hr class="major"/>
+									Back to <a href="index.html">Home</a>
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+								<nav id="menu">
+									<header class="major">
+										<h2>Infra Primer blog !!!</h2>
+									</header>
+									<ul>
+										<li><a href="index.html">Home</a></li>
+										<li><a href="issuelog.html">Issues Log</a></li>
+										<li><a href="ibm.html">IBM</a></li>
+										<li><a href="sgx.html">SGX</a></li>										
+										<li>
+											<span class="opener">Containers/Devops</span>
+											<ul>
+												<li><a href="kubernetes.html">Kubernetes</a></li>
+												<li><a href="#">Openshift</a></li>
+												<li><a href="#">CI/CD</a></li>
+												<li><a href="helminstall.html">Helm</a></li>
+											</ul>
+										</li>
+									</ul>
+								</nav>
+								<section>
+									<header class="major">
+										<h2>Get in touch</h2>
+									</header>
+									<p>Available over email always !!!</p>
+									<ul class="contact">
+										<li class="icon solid fa-envelope"><a href="#">adinh808@yahoo.com</a></li>
+										<li class="icon solid fa-home">Hyderabad, India.</li>
+									</ul>
+								</section>
+								<footer id="footer">
+									<p class="copyright">&copy; H Adinarayana. All rights reserved.</p>
+								</footer>
+						</div>
+					</div>
+
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
